@@ -13,12 +13,12 @@ app.post('/template',async(req:any,res:any)=>{
   const response = await groq.chat.completions.create({
     messages: [
       {
-        role: "user",
-        content: prompt
-      },{
         role:'system',
         content:'Return either node or react based on what do you think this project should be. Only return a single word either node or react.Do not return anything extra'
-        }
+        },{
+        role: "user",
+        content: prompt
+      }
     ],
     model: "meta-llama/llama-4-scout-17b-16e-instruct",
     temperature: 0,
@@ -35,24 +35,27 @@ app.post('/template',async(req:any,res:any)=>{
     process.stdout.write(contentPiece);
     answer += contentPiece;
   }
+  answer = answer.trim();
  if(answer !='react' && answer !='node'){
     return res.status(403).json({message:"You cant access this"})
  }
 if(answer==='react'){
   return  res.json({
-        prompts:[BASE_PROMPT,basePromptR]
+        prompts:[BASE_PROMPT,basePromptR],
+        uiPrompts:[basePromptR]
     })
 }
 if(answer==='node'){
    return res.json({
-        prompts:[basePromptN]
+        prompts:[basePromptN],
+        uiPrompts:[basePromptN]
     })
 }
 
 
 })
 
-async function main() {
+/*async function main() {
   console.log("🔁 main() started");
 
   const chatCompletion = await groq.chat.completions.create({
@@ -78,5 +81,5 @@ async function main() {
   console.log("\n✅ Done streaming.");
 }
 
-main().catch((err) => console.error("❌ Error in main():", err));
-app.listen(3000)
+main().catch((err) => console.error("❌ Error in main():", err)); */
+app.listen(3002)
