@@ -35,16 +35,16 @@ app.post('/template', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const response = yield groq.chat.completions.create({
         messages: [
             {
-                role: "user",
-                content: prompt
-            }, {
                 role: 'system',
                 content: 'Return either node or react based on what do you think this project should be. Only return a single word either node or react.Do not return anything extra'
+            }, {
+                role: "user",
+                content: prompt
             }
         ],
         model: "meta-llama/llama-4-scout-17b-16e-instruct",
         temperature: 0,
-        max_completion_tokens: 100,
+        max_completion_tokens: 8000,
         top_p: 1,
         stream: true,
     });
@@ -67,56 +67,40 @@ app.post('/template', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         }
         finally { if (e_1) throw e_1.error; }
     }
+    answer = answer.trim();
     if (answer != 'react' && answer != 'node') {
         return res.status(403).json({ message: "You cant access this" });
     }
     if (answer === 'react') {
         return res.json({
-            prompts: [prompts_1.BASE_PROMPT, react_1.basePromptR]
+            prompts: [prompts_1.BASE_PROMPT, react_1.basePromptR],
+            uiPrompts: [react_1.basePromptR]
         });
     }
     if (answer === 'node') {
         return res.json({
-            prompts: [node_1.basePromptN]
+            prompts: [node_1.basePromptN],
+            uiPrompts: [node_1.basePromptN]
         });
     }
 }));
-function main() {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a, e_2, _b, _c;
-        var _d, _e;
-        console.log("🔁 main() started");
-        const chatCompletion = yield groq.chat.completions.create({
-            messages: [
-                {
-                    role: "user",
-                    content: "what is 2+2?"
-                }
-            ],
-            model: "meta-llama/llama-4-scout-17b-16e-instruct",
-            temperature: 0,
-            max_completion_tokens: 100,
-            top_p: 1,
-            stream: true,
-        });
-        console.log("📥 Streaming response...");
-        try {
-            for (var _f = true, chatCompletion_1 = __asyncValues(chatCompletion), chatCompletion_1_1; chatCompletion_1_1 = yield chatCompletion_1.next(), _a = chatCompletion_1_1.done, !_a; _f = true) {
-                _c = chatCompletion_1_1.value;
-                _f = false;
-                const chunk = _c;
-                process.stdout.write(((_e = (_d = chunk.choices[0]) === null || _d === void 0 ? void 0 : _d.delta) === null || _e === void 0 ? void 0 : _e.content) || '');
-            }
-        }
-        catch (e_2_1) { e_2 = { error: e_2_1 }; }
-        finally {
-            try {
-                if (!_f && !_a && (_b = chatCompletion_1.return)) yield _b.call(chatCompletion_1);
-            }
-            finally { if (e_2) throw e_2.error; }
-        }
-        console.log("\n✅ Done streaming.");
+app.post("/chat", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const messages = req.body.messages;
+    const response = yield groq.chat.completions.create({
+        messages: [
+            {
+                role: 'system',
+                content: (0, prompts_1.getSystemPrompt)()
+            },
+            ...messages
+        ],
+        model: "meta-llama/llama-4-scout-17b-16e-instruct",
+        temperature: 0,
+        max_completion_tokens: 8000,
+        top_p: 1,
+        stream: true,
     });
-}
-main().catch((err) => console.error("❌ Error in main():", err));
+    console.log(response);
+    res.json({});
+}));
 app.listen(3002);

@@ -4,7 +4,7 @@ import express from 'express'
 import fs from 'fs'
 import { basePromptN } from './defaults/node';
 import { basePromptR } from './defaults/react';
-import { BASE_PROMPT } from './prompts';
+import { BASE_PROMPT, getSystemPrompt } from './prompts';
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const app=express()
 app.use(express.json())
@@ -22,7 +22,7 @@ app.post('/template',async(req:any,res:any)=>{
     ],
     model: "meta-llama/llama-4-scout-17b-16e-instruct",
     temperature: 0,
-    max_completion_tokens: 100,
+    max_completion_tokens: 8000,
     top_p: 1,
     stream: true,
   });
@@ -54,32 +54,23 @@ if(answer==='node'){
 
 
 })
-
-/*async function main() {
-  console.log("🔁 main() started");
-
-  const chatCompletion = await groq.chat.completions.create({
+app.post("/chat",async(req,res)=>{
+const messages=req.body.messages
+ const response = await groq.chat.completions.create({
     messages: [
       {
-        role: "user",
-        content: "what is 2+2?"
-      }
+        role:'system',
+        content: getSystemPrompt()
+        },
+        ...messages
     ],
     model: "meta-llama/llama-4-scout-17b-16e-instruct",
     temperature: 0,
-    max_completion_tokens: 100,
+    max_completion_tokens: 8000,
     top_p: 1,
     stream: true,
   });
-
-  console.log("📥 Streaming response...");
-
-  for await (const chunk of chatCompletion) {
-    process.stdout.write(chunk.choices[0]?.delta?.content || '');
-  }
-
-  console.log("\n✅ Done streaming.");
-}
-
-main().catch((err) => console.error("❌ Error in main():", err)); */
+  console.log(response)
+  res.json({})
+})
 app.listen(3002)
