@@ -71,13 +71,13 @@ app.post('/template', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     if (answer != 'react' && answer != 'node') {
         return res.status(403).json({ message: "You cant access this" });
     }
-    if (answer === 'react') {
+    if (answer === 'react' || 'React') {
         return res.json({
             prompts: [prompts_1.BASE_PROMPT, react_1.basePromptR],
             uiPrompts: [react_1.basePromptR]
         });
     }
-    if (answer === 'node') {
+    if (answer === 'node' || 'Node') {
         return res.json({
             prompts: [node_1.basePromptN],
             uiPrompts: [node_1.basePromptN]
@@ -85,22 +85,40 @@ app.post('/template', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 }));
 app.post("/chat", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, e_2, _b, _c;
+    var _d, _e;
     const messages = req.body.messages;
-    const response = yield groq.chat.completions.create({
-        messages: [
+    const response = yield groq.chat.completions.create({ messages: [
             {
-                role: 'system',
+                role: "system",
                 content: (0, prompts_1.getSystemPrompt)()
-            },
-            ...messages
+            }, ...messages,
         ],
         model: "meta-llama/llama-4-scout-17b-16e-instruct",
-        temperature: 0,
+        temperature: 0.7,
         max_completion_tokens: 8000,
         top_p: 1,
         stream: true,
     });
-    console.log(response);
-    res.json({});
+    let fullResponse = '';
+    try {
+        for (var _f = true, response_2 = __asyncValues(response), response_2_1; response_2_1 = yield response_2.next(), _a = response_2_1.done, !_a; _f = true) {
+            _c = response_2_1.value;
+            _f = false;
+            const chunk = _c;
+            const contentPiece = ((_e = (_d = chunk.choices[0]) === null || _d === void 0 ? void 0 : _d.delta) === null || _e === void 0 ? void 0 : _e.content) || '';
+            process.stdout.write(contentPiece); // Optional: stream to terminal
+            fullResponse += contentPiece;
+        }
+    }
+    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    finally {
+        try {
+            if (!_f && !_a && (_b = response_2.return)) yield _b.call(response_2);
+        }
+        finally { if (e_2) throw e_2.error; }
+    }
+    res.json({ response: fullResponse.trim() });
+    console.log(fullResponse.trim());
 }));
 app.listen(3002);

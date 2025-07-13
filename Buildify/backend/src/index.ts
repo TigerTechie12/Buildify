@@ -39,13 +39,13 @@ app.post('/template',async(req:any,res:any)=>{
  if(answer !='react' && answer !='node'){
     return res.status(403).json({message:"You cant access this"})
  }
-if(answer==='react'){
+if(answer==='react' || 'React' ){
   return  res.json({
         prompts:[BASE_PROMPT,basePromptR],
         uiPrompts:[basePromptR]
     })
 }
-if(answer==='node'){
+if(answer==='node' || 'Node'){
    return res.json({
         prompts:[basePromptN],
         uiPrompts:[basePromptN]
@@ -56,21 +56,32 @@ if(answer==='node'){
 })
 app.post("/chat",async(req,res)=>{
 const messages=req.body.messages
- const response = await groq.chat.completions.create({
-    messages: [
-      {
-        role:'system',
-        content: getSystemPrompt()
-        },
-        ...messages
-    ],
-    model: "meta-llama/llama-4-scout-17b-16e-instruct",
-    temperature: 0,
-    max_completion_tokens: 8000,
-    top_p: 1,
-    stream: true,
-  });
-  console.log(response)
-  res.json({})
+const response = await groq.chat.completions.create({messages:[
+  {
+    role:"system",
+    content:getSystemPrompt()
+
+  }, ...messages,
+],
+ model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      temperature: 0.7,
+      max_completion_tokens: 8000,
+      top_p: 1,
+      stream: true,
+
 })
+    let fullResponse = ''
+    for await (const chunk of response) {
+      const contentPiece = chunk.choices[0]?.delta?.content || ''
+      process.stdout.write(contentPiece)
+      fullResponse += contentPiece
+    }
+
+    res.json({ response: fullResponse.trim() })
+console.log(fullResponse.trim())
+  } 
+  
+
+
+)
 app.listen(3002)
