@@ -153,15 +153,15 @@ export function Builder() {
   async function init() {
     const response = await axios.post(`${BACKEND_URL}/template`, {
       prompt: prompt.trim()
-    });
-    setTemplateSet(true);
+    })
+    setTemplateSet(true)
     
     const {prompts, uiPrompts} = response.data;
 
     setSteps(parseXml(uiPrompts[0]).map((x: Step) => ({
       ...x,
       status: "pending"
-    })));
+    })))
 
     setLoading(true);
     const stepsResponse = await axios.post(`${BACKEND_URL}/chat`, {
@@ -170,9 +170,9 @@ export function Builder() {
         content
       }))
     })
-
+     
     setLoading(false);
-
+          
     setSteps(s => [...s, ...parseXml(stepsResponse.data.response).map(x => ({
       ...x,
       status: "pending" as "pending"

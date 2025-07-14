@@ -8,10 +8,13 @@ export function Home() {
   const [prompt, setPrompt] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit =(e: React.FormEvent) => {
     e.preventDefault();
     if (prompt.trim()) {
-      navigate('/builder', { state: { prompt } });
+            navigate('/builder', { state: { prompt } });
+            
+    }
+  
     }
   };
 
