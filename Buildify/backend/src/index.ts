@@ -2,11 +2,13 @@ require("dotenv").config();
 import { Groq } from 'groq-sdk';
 import express from 'express'
 import fs from 'fs'
+import cors from 'cors'
 import { basePromptN } from './defaults/node';
 import { basePromptR } from './defaults/react';
 import { BASE_PROMPT, getSystemPrompt } from './prompts';
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const app=express()
+app.use(cors())
 app.use(express.json())
 app.post('/template',async(req:any,res:any)=>{
     const prompt=req.body.prompt

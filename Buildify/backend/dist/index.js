@@ -22,11 +22,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv").config();
 const groq_sdk_1 = require("groq-sdk");
 const express_1 = __importDefault(require("express"));
+const cors_1 = __importDefault(require("cors"));
 const node_1 = require("./defaults/node");
 const react_1 = require("./defaults/react");
 const prompts_1 = require("./prompts");
 const groq = new groq_sdk_1.Groq({ apiKey: process.env.GROQ_API_KEY });
 const app = (0, express_1.default)();
+app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.post('/template', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, e_1, _b, _c;
@@ -107,7 +109,7 @@ app.post("/chat", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             _f = false;
             const chunk = _c;
             const contentPiece = ((_e = (_d = chunk.choices[0]) === null || _d === void 0 ? void 0 : _d.delta) === null || _e === void 0 ? void 0 : _e.content) || '';
-            process.stdout.write(contentPiece); // Optional: stream to terminal
+            process.stdout.write(contentPiece);
             fullResponse += contentPiece;
         }
     }
